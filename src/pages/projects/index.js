@@ -3,6 +3,7 @@ import Layout from '../../components/Layout'
 // !VA Don't forget you need to use ES6 syntax to import the styles
 import * as styles from '../../styles/projects.module.css'
 import { Link, graphql } from 'gatsby'
+import Img from 'gatsby-image'
 
 // !VA The exported query returns the data as props. Destructure out the data property. 
 const Projects = ({ data }) => {
@@ -17,6 +18,7 @@ const Projects = ({ data }) => {
 
   // !VA Map through the projects array and render the queried data in the Link property, the h3 and the p elements. This is standard React procedure.
   // !VA Chapter 15: Add the email contact
+  // !VA Chapter 17: Import the Img component, add an Img component, then provide the reference to the thumbs in the fluid prop.
   return (
     <Layout>
       <div className={styles.portfolio}>
@@ -26,6 +28,7 @@ const Projects = ({ data }) => {
           {projects.map(project => (
             <Link to={"/projects/" + project.frontmatter.slug} key={project.id}>
               <div>
+                <Img fluid={project.frontmatter.thumb.childImageSharp.fluid} />
                 <h3>{ project.frontmatter.title }</h3>
                 <p>{ project.frontmatter.stack }</p>
               </div>
@@ -45,21 +48,28 @@ export default Projects
 // !VA Chapter 14: This query now includes ordering by date.
 // !VA Chapter 15 now includes multiple queries in the ProjectsPage query - the site/siteMetadata/contact is also being queried. You can also NAME parts of the query, as below with the projects and site. This makes it more clear when logging the data because it provides a semantic name for the parts of the query. So instead of allMarkdownRemark and site, the query properties are names 'projects' and 'contact'. Now, the data is returned in the data prop as 'projects' not allMarkdownRemark, so that has to be changed in the prop above - the property is now called 'projects'. 
 export const query = graphql`
-  query ProjectsPage {
-    projects: allMarkdownRemark(sort: {frontmatter: {date: ASC}}) {
-      nodes {
-        frontmatter {
-          slug
-          stack
-          title
+query ProjectsPage {
+  projects: allMarkdownRemark {
+    nodes {
+      frontmatter {
+        slug
+        stack
+        title
+        thumb {
+          childImageSharp {
+            fluid {
+              ...GatsbyImageSharpFluid
+            }
+          }
         }
-        id
       }
-    }
-    contact: site {
-      siteMetadata {
-        contact
-      }
+      id
     }
   }
+  contact: site {
+    siteMetadata {
+      contact
+    }
+  }
+}
 `
